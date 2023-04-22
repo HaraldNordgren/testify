@@ -92,9 +92,9 @@ func removeUnexported(expected interface{}) interface{} {
 			field := expectedType.Field(i)
 			isExported := field.PkgPath == "" // should use field.IsExported() but it's not available in Go 1.16.5
 			if isExported {
-				result.Elem().Field(i).Set(expectedValue.Field(i))
+				newValue := removeUnexported(expectedValue.Field(i).Interface())
+				result.Elem().Field(i).Set(reflect.ValueOf(newValue))
 			}
-
 		}
 		return result.Elem().Interface()
 

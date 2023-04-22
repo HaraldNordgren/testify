@@ -175,6 +175,10 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 		Exported1 []*Nested
 	}
 
+	type S5 struct {
+		Exported Nested
+	}
+
 	intValue := 1
 
 	cases := []struct {
@@ -225,12 +229,36 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 		unexported string
 	}
 
-	input := Foo{"a", "b"}
-	output := removeUnexported(input)
-	exp := Foo{"a", ""}
+	cases1 := []struct {
+		input    interface{}
+		expected interface{}
+	}{
+		{
+			input:    Foo{"a", "b"},
+			expected: Foo{"a", ""},
+		},
+		{
+			input:    Nested{"a", "b"},
+			expected: Nested{"a", nil},
+		},
+		{
+			input: S5{
+				Exported: Nested{"a", "b"},
+			},
+			expected: S5{
+				Exported: Nested{"a", nil},
+			},
+		},
+	}
 
-	if !ObjectsAreEqual(exp, output) {
-		t.Errorf("%#v, %#v should be equal", exp, output)
+	for _, c := range cases1 {
+		t.Run("", func(t *testing.T) {
+			output := removeUnexported(c.input)
+			if !ObjectsAreEqualValues(c.expected, output) {
+				t.Errorf("%#v, %#v should be equal", c.expected, output)
+			}
+
+		})
 	}
 }
 
