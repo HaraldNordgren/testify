@@ -76,7 +76,6 @@ func ObjectsAreEqual(expected, actual interface{}) bool {
 }
 
 func removeUnexported(expected interface{}) interface{} {
-
 	if isNil(expected) {
 		return expected
 	}
@@ -93,15 +92,42 @@ func removeUnexported(expected interface{}) interface{} {
 			isExported := field.PkgPath == "" // should use field.IsExported() but it's not available in Go 1.16.5
 			if isExported {
 				newValue := removeUnexported(expectedValue.Field(i).Interface())
-				result.Elem().Field(i).Set(reflect.ValueOf(newValue))
+				if isNil(newValue) {
+					continue
+				}
+
+				var newValueTyped reflect.Value
+
+				fmt.Printf("######22 %v\n", expectedValue.Field(i).Kind())
+				if expectedValue.Field(i).Kind() == reflect.Ptr {
+					fmt.Printf("!!!!!!241 %#v\n", "ptr")
+					newValueTyped = reflect.ValueOf(newValue).Convert(expectedValue.Field(i).Elem().Type())
+					fmt.Printf("!!!!!!242 %#v\n", newValueTyped)
+					inter := newValueTyped.Interface()
+					fmt.Printf("!!!!!!243 %#v\n", newValueTyped)
+					reflect.ValueOf(&inter).Elem().Set(newValueTyped)
+
+					// TODO: How to assign to result? Via a pointer?
+					// Above, we are not assigning to result. That's why it's nil in the test!
+					//result.Elem().Field(i).Set(newValueTyped)
+				} else {
+					fmt.Printf("!!!!!!251 \n")
+					newValueTyped = reflect.ValueOf(newValue).Convert(expectedValue.Field(i).Type())
+					fmt.Printf("!!!!!!252 %#v\n", newValueTyped)
+					result.Elem().Field(i).Set(newValueTyped)
+				}
 			}
 		}
 		return result.Elem().Interface()
 
+	case reflect.Ptr:
+		expectedElem := expectedValue.Elem().Interface()
+		newValue := removeUnexported(expectedElem)
+		fmt.Printf("!!!!!!21 %v\n", newValue)
+		return newValue
+		//return ObjectsExportedFieldsAreEqual(expectedElem, actualElem)
+
 		/*
-			case reflect.Interface, reflect.Ptr:
-				expectedElem := expectedValue.Elem().Interface()
-				return ObjectsExportedFieldsAreEqual(expectedElem, actualElem)
 
 			case reflect.Array, reflect.Slice:
 				expectedLen := expectedValue.Len()
