@@ -75,6 +75,53 @@ func ObjectsAreEqual(expected, actual interface{}) bool {
 	return bytes.Equal(exp, act)
 }
 
+func removeUnexported(expected interface{}) interface{} {
+
+	if isNil(expected) {
+		return expected
+	}
+
+	expectedType := reflect.TypeOf(expected)
+	expectedKind := expectedType.Kind()
+	expectedValue := reflect.ValueOf(expected)
+
+	switch expectedKind {
+	case reflect.Struct:
+		result := reflect.New(expectedType)
+		for i := 0; i < expectedType.NumField(); i++ {
+			field := expectedType.Field(i)
+			isExported := field.PkgPath == "" // should use field.IsExported() but it's not available in Go 1.16.5
+			if isExported {
+				result.Elem().Field(i).Set(expectedValue.Field(i))
+			}
+
+		}
+		return result.Elem().Interface()
+
+		/*
+			case reflect.Interface, reflect.Ptr:
+				expectedElem := expectedValue.Elem().Interface()
+				return ObjectsExportedFieldsAreEqual(expectedElem, actualElem)
+
+			case reflect.Array, reflect.Slice:
+				expectedLen := expectedValue.Len()
+				if expectedLen != actualValue.Len() {
+					return false
+				}
+				for i := 0; i < expectedLen; i++ {
+					expectedElem := expectedValue.Index(i).Elem().Interface()
+					actualElem := actualValue.Index(i).Elem().Interface()
+					if !ObjectsExportedFieldsAreEqual(expectedElem, actualElem) {
+						return false
+					}
+				}
+				return true
+		*/
+	}
+
+	return expected
+}
+
 // ObjectsExportedFieldsAreEqual determines if the exported (public) fields of two structs are considered equal.
 // If the two objects are not of the same type, or if either of them are not a struct, they are not considered equal.
 //

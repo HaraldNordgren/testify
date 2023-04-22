@@ -219,6 +219,19 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 
 		})
 	}
+
+	type Foo struct {
+		Exported   string
+		unexported string
+	}
+
+	input := Foo{"a", "b"}
+	output := removeUnexported(input)
+	exp := Foo{"a", ""}
+
+	if !ObjectsAreEqual(exp, output) {
+		t.Errorf("%#v, %#v should be equal", exp, output)
+	}
 }
 
 func TestImplements(t *testing.T) {
@@ -2168,6 +2181,26 @@ Diff:
 	actual = diff(
 		time.Date(2020, 9, 24, 0, 0, 0, 0, time.UTC),
 		time.Date(2020, 9, 25, 0, 0, 0, 0, time.UTC),
+	)
+	Equal(t, expected, actual)
+}
+
+func TestDiffExported(t *testing.T) {
+	expected := `
+
+Diff:
+--- Expected
++++ Actual
+@@ -2,3 +2,3 @@
+  A: (string) (len=11) "some string",
+- B: (int) 10
++ B: (int) 15
+ }
+`
+
+	actual := diff(
+		diffTestingStruct{A: "some string", B: 10},
+		diffTestingStruct{A: "some string", B: 15},
 	)
 	Equal(t, expected, actual)
 }
