@@ -266,6 +266,24 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 			},
 		},
 		{
+			input: S4{[]*Nested{
+				{1, 2}},
+			},
+			expected: S4{[]*Nested{
+				{1, nil}},
+			},
+		},
+		{
+			input: S4{[]*Nested{
+				{1, 2},
+				{3, 4},
+			}},
+			expected: S4{[]*Nested{
+				{1, nil},
+				{3, nil},
+			}},
+		},
+		{
 			input: S5{
 				Exported: Nested{"a", "b"},
 			},

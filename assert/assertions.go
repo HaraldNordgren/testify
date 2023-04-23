@@ -110,22 +110,14 @@ func removeUnexported(expected interface{}) interface{} {
 		fmt.Printf("!!!!!!36 %#v\n", expected)
 		return expected
 
-		/*
+	case reflect.Array, reflect.Slice:
+		for i := 0; i < expectedValue.Len(); i++ {
+			elem := expectedValue.Index(i).Elem()
+			unexportedRemoved := removeUnexported(elem.Interface())
+			elem.Set(reflect.ValueOf(unexportedRemoved))
+		}
+		return expected
 
-			case reflect.Array, reflect.Slice:
-				expectedLen := expectedValue.Len()
-				if expectedLen != actualValue.Len() {
-					return false
-				}
-				for i := 0; i < expectedLen; i++ {
-					expectedElem := expectedValue.Index(i).Elem().Interface()
-					actualElem := actualValue.Index(i).Elem().Interface()
-					if !ObjectsExportedFieldsAreEqual(expectedElem, actualElem) {
-						return false
-					}
-				}
-				return true
-		*/
 	}
 
 	return expected
