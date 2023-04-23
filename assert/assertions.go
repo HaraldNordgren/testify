@@ -89,7 +89,7 @@ func removeUnexported(expected interface{}) interface{} {
 
 	switch expectedKind {
 	case reflect.Struct:
-		result := reflect.New(expectedType)
+		result := reflect.New(expectedType).Elem()
 		for i := 0; i < expectedType.NumField(); i++ {
 			field := expectedType.Field(i)
 			isExported := field.PkgPath == "" // should use field.IsExported() but it's not available in Go 1.16.5
@@ -101,12 +101,12 @@ func removeUnexported(expected interface{}) interface{} {
 				fmt.Printf("!!!!!21 %#v\n", fieldValue)
 				newValue := removeUnexported(fieldValue.Interface())
 				fmt.Printf("!!!!!22 %#v\n", newValue)
-				result.Elem().Field(i).Set(reflect.ValueOf(newValue))
+				result.Field(i).Set(reflect.ValueOf(newValue))
 			}
 		}
 
-		fmt.Printf("!!!!!22 struct to return %#v\n", result.Elem().Interface())
-		return result.Elem().Interface()
+		fmt.Printf("!!!!!22 struct to return %#v\n", result.Interface())
+		return result.Interface()
 
 	case reflect.Ptr:
 		fmt.Printf("!!!!!!3 %#v\n", "hello from reflect.Ptr")
