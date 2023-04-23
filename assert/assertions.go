@@ -85,7 +85,7 @@ func removeUnexported(expected interface{}) interface{} {
 	expectedValue := reflect.ValueOf(expected)
 
 	fmt.Printf("\n#####1 %s\n", expectedKind)
-	fmt.Printf("!!!!!2 %#v\n", expectedValue)
+	fmt.Printf("!!!!!11 %#v\n", expectedValue)
 
 	switch expectedKind {
 	case reflect.Struct:
@@ -94,7 +94,13 @@ func removeUnexported(expected interface{}) interface{} {
 			field := expectedType.Field(i)
 			isExported := field.PkgPath == "" // should use field.IsExported() but it's not available in Go 1.16.5
 			if isExported {
-				newValue := removeUnexported(expectedValue.Field(i).Interface())
+				fieldValue := expectedValue.Field(i)
+				if isNil(fieldValue) || isNil(fieldValue.Interface()) {
+					continue
+				}
+				fmt.Printf("!!!!!21 %#v\n", fieldValue)
+				newValue := removeUnexported(fieldValue.Interface())
+				fmt.Printf("!!!!!22 %#v\n", newValue)
 				result.Elem().Field(i).Set(reflect.ValueOf(newValue))
 			}
 		}
@@ -105,19 +111,20 @@ func removeUnexported(expected interface{}) interface{} {
 	case reflect.Ptr:
 		fmt.Printf("!!!!!!3 %#v\n", "hello from reflect.Ptr")
 		unexportedRemoved := removeUnexported(expectedValue.Elem().Interface())
-		fmt.Printf("!!!!!!33 %#v\n", unexportedRemoved)
+		fmt.Printf("!!!!!!31 %#v\n", unexportedRemoved)
 		expectedValue.Elem().Set(reflect.ValueOf(unexportedRemoved))
-		fmt.Printf("!!!!!!36 %#v\n", expected)
-		return expected
+		fmt.Printf("!!!!!!32 %#v\n", expected)
 
 	case reflect.Array, reflect.Slice:
 		for i := 0; i < expectedValue.Len(); i++ {
-			elem := expectedValue.Index(i).Elem()
-			unexportedRemoved := removeUnexported(elem.Interface())
-			elem.Set(reflect.ValueOf(unexportedRemoved))
+			index := expectedValue.Index(i)
+			if isNil(index) {
+				continue
+			}
+			fmt.Printf("!!!!!!41 %#v\n", index)
+			unexportedRemoved := removeUnexported(index.Interface())
+			index.Set(reflect.ValueOf(unexportedRemoved))
 		}
-		return expected
-
 	}
 
 	return expected
@@ -128,62 +135,9 @@ func removeUnexported(expected interface{}) interface{} {
 //
 // This function does no assertion of any kind.
 func ObjectsExportedFieldsAreEqual(expected, actual interface{}) bool {
-	if isNil(expected) || isNil(actual) {
-		return expected == actual
-	}
-
-	expectedType := reflect.TypeOf(expected)
-	actualType := reflect.TypeOf(actual)
-	if expectedType != actualType {
-		return false
-	}
-
-	expectedKind := expectedType.Kind()
-	actualKind := actualType.Kind()
-	if expectedKind != actualKind {
-		return false
-	}
-
-	expectedValue := reflect.ValueOf(expected)
-	actualValue := reflect.ValueOf(actual)
-
-	switch expectedKind {
-	case reflect.Struct:
-		for i := 0; i < expectedType.NumField(); i++ {
-			field := expectedType.Field(i)
-			isExported := field.PkgPath == "" // should use field.IsExported() but it's not available in Go 1.16.5
-			if isExported {
-				expectedElem := expectedValue.Field(i).Interface()
-				actualElem := actualValue.Field(i).Interface()
-				if !ObjectsExportedFieldsAreEqual(expectedElem, actualElem) {
-					return false
-				}
-			}
-		}
-		return true
-
-	case reflect.Interface, reflect.Ptr:
-		expectedElem := expectedValue.Elem().Interface()
-		actualElem := actualValue.Elem().Interface()
-		return ObjectsExportedFieldsAreEqual(expectedElem, actualElem)
-
-	case reflect.Array, reflect.Slice:
-		expectedLen := expectedValue.Len()
-		if expectedLen != actualValue.Len() {
-			return false
-		}
-		for i := 0; i < expectedLen; i++ {
-			expectedElem := expectedValue.Index(i).Elem().Interface()
-			actualElem := actualValue.Index(i).Elem().Interface()
-			if !ObjectsExportedFieldsAreEqual(expectedElem, actualElem) {
-				return false
-			}
-		}
-		return true
-
-	default:
-		return ObjectsAreEqualValues(expectedValue.Interface(), actualValue.Interface())
-	}
+	expectedCleaned := removeUnexported(expected)
+	actualCleaned := removeUnexported(actual)
+	return ObjectsAreEqualValues(expectedCleaned, actualCleaned)
 }
 
 // ObjectsAreEqualValues gets whether two objects are equal, or if their
@@ -613,6 +567,9 @@ func EqualExportedValues(t TestingT, expected, actual interface{}, msgAndArgs ..
 	if bType.Kind() != reflect.Struct {
 		return Fail(t, fmt.Sprintf("Types expected to both be struct \n\t%v != %v", bType.Kind(), reflect.Struct), msgAndArgs...)
 	}
+
+	//expected = removeUnexported(expected)
+	//actual = removeUnexported(actual)
 
 	if !ObjectsExportedFieldsAreEqual(expected, actual) {
 		diff := diff(expected, actual)
