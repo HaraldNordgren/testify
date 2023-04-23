@@ -106,10 +106,7 @@ func removeUnexported(expected interface{}) interface{} {
 		fmt.Printf("!!!!!!3 %#v\n", "hello from reflect.Ptr")
 		unexportedRemoved := removeUnexported(expectedValue.Elem().Interface())
 		fmt.Printf("!!!!!!33 %#v\n", unexportedRemoved)
-		p := reflect.New(reflect.TypeOf(unexportedRemoved))
-		fmt.Printf("!!!!!!34 %#v\n", p.Elem())
 		expectedValue.Elem().Set(reflect.ValueOf(unexportedRemoved))
-		fmt.Printf("!!!!!!35 %#v\n", p.Elem())
 		fmt.Printf("!!!!!!36 %#v\n", expected)
 		return expected
 
