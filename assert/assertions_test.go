@@ -233,16 +233,14 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 		input    interface{}
 		expected interface{}
 	}{
-		/*
-			{
-				input:    Foo{"a", "b"},
-				expected: Foo{"a", ""},
-			},
-			{
-				input:    Nested{"a", "b"},
-				expected: Nested{"a", nil},
-			},
-		*/
+		{
+			input:    Foo{"a", "b"},
+			expected: Foo{"a", ""},
+		},
+		{
+			input:    Nested{"a", "b"},
+			expected: Nested{"a", nil},
+		},
 		{
 			input: S3{
 				Exported1: &Nested{"a", "b"},
@@ -251,23 +249,21 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 				Exported1: &Nested{"a", nil},
 			},
 		},
-		/*
-			{
-				input: S5{
-					Exported: Nested{"a", "b"},
-				},
-				expected: S5{
-					Exported: Nested{"a", nil},
-				},
+		{
+			input: S5{
+				Exported: Nested{"a", "b"},
 			},
-		*/
+			expected: S5{
+				Exported: Nested{"a", nil},
+			},
+		},
 	}
 
 	for _, c := range cases1 {
 		t.Run("", func(t *testing.T) {
 			output := removeUnexported(c.input)
 
-			for _, x := range []interface{}{c.input, output} {
+			for _, x := range []interface{}{c.input, output, c.expected} {
 				switch v := x.(type) {
 				case S3:
 					if v.Exported1 != nil {

@@ -84,6 +84,9 @@ func removeUnexported(expected interface{}) interface{} {
 	expectedKind := expectedType.Kind()
 	expectedValue := reflect.ValueOf(expected)
 
+	fmt.Printf("\n#####1 %s\n", expectedKind)
+	fmt.Printf("!!!!!2 %#v\n", expectedValue)
+
 	switch expectedKind {
 	case reflect.Struct:
 		result := reflect.New(expectedType)
@@ -96,35 +99,83 @@ func removeUnexported(expected interface{}) interface{} {
 					continue
 				}
 
-				var newValueTyped reflect.Value
-
-				fmt.Printf("######22 %v\n", expectedValue.Field(i).Kind())
-				if expectedValue.Field(i).Kind() == reflect.Ptr {
-					fmt.Printf("!!!!!!241 %#v\n", "ptr")
-					newValueTyped = reflect.ValueOf(newValue).Convert(expectedValue.Field(i).Elem().Type())
-					fmt.Printf("!!!!!!242 %#v\n", newValueTyped)
+				/*
+					fmt.Printf("!!!!!!211 Convert: %#v\n", newValue)
+					fieldType := expectedValue.Field(i).Elem().Type()
+					//fmt.Printf("!!!!!!212 fieldType: %#v\n", fieldType)
+					newValueTyped := reflect.ValueOf(newValue).Convert(fieldType)
+					fmt.Printf("!!!!!!213 set value: %#v\n", newValueTyped)
 					inter := newValueTyped.Interface()
-					fmt.Printf("!!!!!!243 %#v\n", newValueTyped)
-					reflect.ValueOf(&inter).Elem().Set(newValueTyped)
-
-					// TODO: How to assign to result? Via a pointer?
-					// Above, we are not assigning to result. That's why it's nil in the test!
-					//result.Elem().Field(i).Set(newValueTyped)
-				} else {
-					fmt.Printf("!!!!!!251 \n")
-					newValueTyped = reflect.ValueOf(newValue).Convert(expectedValue.Field(i).Type())
-					fmt.Printf("!!!!!!252 %#v\n", newValueTyped)
+					fmt.Printf("!!!!!!214 set value: %#v\n", &inter)
 					result.Elem().Field(i).Set(newValueTyped)
-				}
+				*/
+				result.Elem().Field(i).Set(reflect.ValueOf(newValue))
+
+				/*
+					var newValueTyped reflect.Value
+
+					if expectedValue.Field(i).Kind() == reflect.Ptr {
+						fmt.Printf("!!!!!!241 %#v\n", "ptr")
+						newValueTyped = reflect.ValueOf(newValue).Convert(expectedValue.Field(i).Elem().Type())
+						fmt.Printf("!!!!!!242 %#v\n", newValueTyped)
+						inter := newValueTyped.Interface()
+						p := &inter
+						fmt.Printf("!!!!!!243 %#v\n", newValueTyped)
+						reflect.ValueOf(&inter).Elem().Set(newValueTyped)
+
+						fmt.Printf("!!!!!!244 %#v\n", newValueTyped)
+
+						//y := result.Elem().Field(i)
+
+						// TODO: How to assign to result? Via a pointer?
+						// Above, we are not assigning to result. That's why it's nil in the test!
+						//y.Set(reflect.ValueOf(p))
+						result.Elem().Field(i).Set(reflect.ValueOf(p))
+					} else {
+						fmt.Printf("!!!!!!251 \n")
+						newValueTyped = reflect.ValueOf(newValue).Convert(expectedValue.Field(i).Type())
+						//fmt.Printf("!!!!!!252 %#v\n", newValueTyped)
+						result.Elem().Field(i).Set(newValueTyped)
+					}
+				*/
 			}
 		}
+
+		fmt.Printf("!!!!!22 struct to return %#v\n", result.Elem().Interface())
+
 		return result.Elem().Interface()
 
 	case reflect.Ptr:
-		expectedElem := expectedValue.Elem().Interface()
-		newValue := removeUnexported(expectedElem)
-		fmt.Printf("!!!!!!21 %v\n", newValue)
-		return newValue
+
+		fmt.Printf("!!!!!!3 %#v\n", "hello from reflect.Ptr")
+		//fmt.Printf("!!!!!!31 %#v %#v\n", expectedValue.CanAddr(), expectedValue.Elem().CanAddr())
+		//fmt.Printf("!!!!!!32 %#v %#v\n", expectedValue.CanSet(), expectedValue.Elem().CanSet())
+
+		unexportedRemoved := removeUnexported(expectedValue.Elem().Interface())
+		//v := reflect.ValueOf(unexportedRemoved)
+		//inter := v.Interface()
+		//p := &inter
+		fmt.Printf("!!!!!!33 %#v\n", unexportedRemoved)
+
+		p := reflect.New(reflect.TypeOf(unexportedRemoved))
+		fmt.Printf("!!!!!!34 %#v\n", p.Elem())
+		expectedValue.Elem().Set(reflect.ValueOf(unexportedRemoved))
+		fmt.Printf("!!!!!!35 %#v\n", p.Elem())
+		fmt.Printf("!!!!!!36 %#v\n", expected)
+
+		return expected
+
+		//fmt.Printf("!!!!!!34 %#v\n", expected)
+		//fmt.Printf("!!!!!!35 %#v\n", inter)
+		//reflect.ValueOf(expected).Elem().Set(reflect.ValueOf(&unexportedRemoved))
+		//return unexportedRemoved
+
+		/*
+			expectedElem := expectedValue.Elem().Interface()
+			newValue := removeUnexported(expectedElem)
+			fmt.Printf("!!!!!!21 %v\n", newValue)
+			return newValue
+		*/
 		//return ObjectsExportedFieldsAreEqual(expectedElem, actualElem)
 
 		/*
@@ -143,6 +194,9 @@ func removeUnexported(expected interface{}) interface{} {
 				}
 				return true
 		*/
+
+	default:
+		//fmt.Printf("!!!!!!3 %#v %#v\n", "hello from value case", reflect.ValueOf(expected))
 	}
 
 	return expected
