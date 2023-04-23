@@ -116,15 +116,18 @@ func removeUnexported(expected interface{}) interface{} {
 		fmt.Printf("!!!!!!32 %#v\n", expected)
 
 	case reflect.Array, reflect.Slice:
+		result := reflect.MakeSlice(expectedType, expectedValue.Len(), expectedValue.Len())
 		for i := 0; i < expectedValue.Len(); i++ {
 			index := expectedValue.Index(i)
 			if isNil(index) {
 				continue
 			}
 			fmt.Printf("!!!!!!41 %#v\n", index)
+			fmt.Printf("!!!!!!42 %#v\n", result)
 			unexportedRemoved := removeUnexported(index.Interface())
-			index.Set(reflect.ValueOf(unexportedRemoved))
+			result.Index(i).Set(reflect.ValueOf(unexportedRemoved))
 		}
+		return result.Interface()
 	}
 
 	return expected
