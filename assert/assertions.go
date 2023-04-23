@@ -130,9 +130,10 @@ func removeUnexported(expected interface{}) interface{} {
 			result.Index(i).Set(reflect.ValueOf(unexportedRemoved))
 		}
 		return result.Interface()
-	}
 
-	return expected
+	default:
+		return expected
+	}
 }
 
 // ObjectsExportedFieldsAreEqual determines if the exported (public) fields of two structs are considered equal.
