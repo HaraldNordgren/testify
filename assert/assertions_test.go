@@ -234,6 +234,22 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 		expected interface{}
 	}{
 		{
+			input:    S{1, Nested{2, 3}, 4, Nested{5, 6}},
+			expected: S{1, Nested{2, nil}, nil, Nested{}},
+		},
+		{
+			input:    S3{&Nested{1, 2}, &Nested{3, 4}},
+			expected: S3{&Nested{1, nil}, &Nested{3, nil}},
+		},
+		{
+			input:    S3{},
+			expected: S3{},
+		},
+		{
+			input:    Nested{&intValue, 2},
+			expected: Nested{&intValue, nil},
+		},
+		{
 			input:    Foo{"a", "b"},
 			expected: Foo{"a", ""},
 		},
