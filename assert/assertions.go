@@ -574,9 +574,6 @@ func EqualExportedValues(t TestingT, expectedRaw, actualRaw interface{}, msgAndA
 		return Fail(t, fmt.Sprintf("Types expected to both be struct \n\t%v != %v", bType.Kind(), reflect.Struct), msgAndArgs...)
 	}
 
-	//expected = removeUnexported(expected)
-	//actual = removeUnexported(actual)
-
 	expected := copyExportedFields(expectedRaw)
 	actual := copyExportedFields(actualRaw)
 

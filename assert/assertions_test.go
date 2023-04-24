@@ -263,12 +263,8 @@ func TestCopyExportedFields(t *testing.T) {
 			expected: S3{&Nested{1, nil}, &Nested{3, nil}},
 		},
 		{
-			input: S3{
-				Exported1: &Nested{"a", "b"},
-			},
-			expected: S3{
-				Exported1: &Nested{"a", nil},
-			},
+			input:    S3{Exported1: &Nested{"a", "b"}},
+			expected: S3{Exported1: &Nested{"a", nil}},
 		},
 		{
 			input: S4{[]*Nested{
@@ -299,12 +295,8 @@ func TestCopyExportedFields(t *testing.T) {
 			}},
 		},
 		{
-			input: S5{
-				Exported: Nested{"a", "b"},
-			},
-			expected: S5{
-				Exported: Nested{"a", nil},
-			},
+			input:    S5{Exported: Nested{"a", "b"}},
+			expected: S5{Exported: Nested{"a", nil}},
 		},
 		{
 			input:    S6{"a", "b"},
