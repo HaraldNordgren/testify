@@ -149,35 +149,41 @@ func TestObjectsAreEqual(t *testing.T) {
 
 }
 
+type Nested struct {
+	Exported    interface{}
+	notExported interface{}
+}
+
+type S struct {
+	Exported1    interface{}
+	Exported2    Nested
+	notExported1 interface{}
+	notExported2 Nested
+}
+
+type S2 struct {
+	foo interface{}
+}
+
+type S3 struct {
+	Exported1 *Nested
+	Exported2 *Nested
+}
+
+type S4 struct {
+	Exported1 []*Nested
+}
+
+type S5 struct {
+	Exported Nested
+}
+
+type Foo struct {
+	Exported   string
+	unexported string
+}
+
 func TestObjectsExportedFieldsAreEqual(t *testing.T) {
-	type Nested struct {
-		Exported    interface{}
-		notExported interface{}
-	}
-
-	type S struct {
-		Exported1    interface{}
-		Exported2    Nested
-		notExported1 interface{}
-		notExported2 Nested
-	}
-
-	type S2 struct {
-		foo interface{}
-	}
-
-	type S3 struct {
-		Exported1 *Nested
-		Exported2 *Nested
-	}
-
-	type S4 struct {
-		Exported1 []*Nested
-	}
-
-	type S5 struct {
-		Exported Nested
-	}
 
 	intValue := 1
 
@@ -222,11 +228,6 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 			}
 
 		})
-	}
-
-	type Foo struct {
-		Exported   string
-		unexported string
 	}
 
 	cases1 := []struct {
@@ -310,24 +311,65 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 	for _, c := range cases1 {
 		t.Run("", func(t *testing.T) {
 			output := removeUnexported(c.input)
-
-			for _, x := range []interface{}{c.input, output, c.expected} {
-				switch v := x.(type) {
-				case S3:
-					if v.Exported1 != nil {
-						fmt.Println(*v.Exported1)
-					} else {
-						fmt.Println(v.Exported1)
-					}
-				}
-			}
-
 			if !ObjectsAreEqualValues(c.expected, output) {
 				t.Errorf("%#v, %#v should be equal", c.expected, output)
 			}
 
 		})
 	}
+}
+
+func TestEqualExportedValues(t *testing.T) {
+	cases := []struct {
+		value1          interface{}
+		value2          interface{}
+		expectedSuccess bool
+		expectedFail    string
+	}{
+		{
+			value1:          S{1, Nested{2, 3}, 4, Nested{5, 6}},
+			value2:          S{1, Nested{2, nil}, nil, Nested{}},
+			expectedSuccess: true,
+		},
+		{
+			value1:          S{1, Nested{2, 3}, 4, Nested{5, 6}},
+			value2:          S{1, Nested{1, nil}, nil, Nested{}},
+			expectedSuccess: false,
+			expectedFail: `
+	Error Trace:	
+	Error:      	Not equal (comparing only exported fields): 
+	            	expected: assert.S{Exported1:1, Exported2:assert.Nested{Exported:2, notExported:interface {}(nil)}, notExported1:interface {}(nil), notExported2:assert.Nested{Exported:interface {}(nil), notExported:interface {}(nil)}}
+	            	actual  : assert.S{Exported1:1, Exported2:assert.Nested{Exported:1, notExported:interface {}(nil)}, notExported1:interface {}(nil), notExported2:assert.Nested{Exported:interface {}(nil), notExported:interface {}(nil)}}
+	            	
+	            	Diff:
+	            	--- Expected
+	            	+++ Actual
+	            	@@ -3,3 +3,3 @@
+	            	  Exported2: (assert.Nested) {
+	            	-  Exported: (int) 2,
+	            	+  Exported: (int) 1,
+	            	   notExported: (interface {}) <nil>`,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run("", func(t *testing.T) {
+			mockT := new(mockTestingT)
+
+			result := EqualExportedValues(mockT, c.value1, c.value2)
+			if result != c.expectedSuccess {
+				t.Errorf("wrong result")
+			}
+
+			actualFail := mockT.errorString()
+			fmt.Printf("!!!!11 %v\n", actualFail)
+
+			if !strings.Contains(actualFail, c.expectedFail) {
+				t.Errorf("Contains failure should include %q but was %q", c.expectedFail, actualFail)
+			}
+		})
+	}
+
 }
 
 func TestImplements(t *testing.T) {
@@ -2281,6 +2323,7 @@ Diff:
 	Equal(t, expected, actual)
 }
 
+// TODO: Remove
 func TestDiffExported(t *testing.T) {
 	expected := `
 

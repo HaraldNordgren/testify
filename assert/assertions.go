@@ -141,9 +141,9 @@ func removeUnexported(expected interface{}) interface{} {
 //
 // This function does no assertion of any kind.
 func ObjectsExportedFieldsAreEqual(expected, actual interface{}) bool {
-	expectedCleaned := removeUnexported(expected)
-	actualCleaned := removeUnexported(actual)
-	return ObjectsAreEqualValues(expectedCleaned, actualCleaned)
+	//expectedCleaned := removeUnexported(expected)
+	//actualCleaned := removeUnexported(actual)
+	return ObjectsAreEqualValues(expected, actual)
 }
 
 // ObjectsAreEqualValues gets whether two objects are equal, or if their
@@ -554,13 +554,13 @@ func EqualValues(t TestingT, expected, actual interface{}, msgAndArgs ...interfa
 //	 }
 //	 assert.EqualExportedValues(t, S{1, 2}, S{1, 3}) => true
 //	 assert.EqualExportedValues(t, S{1, 2}, S{2, 3}) => false
-func EqualExportedValues(t TestingT, expected, actual interface{}, msgAndArgs ...interface{}) bool {
+func EqualExportedValues(t TestingT, expectedRaw, actualRaw interface{}, msgAndArgs ...interface{}) bool {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
 	}
 
-	aType := reflect.TypeOf(expected)
-	bType := reflect.TypeOf(actual)
+	aType := reflect.TypeOf(expectedRaw)
+	bType := reflect.TypeOf(actualRaw)
 
 	if aType != bType {
 		return Fail(t, fmt.Sprintf("Types expected to match exactly\n\t%v != %v", aType, bType), msgAndArgs...)
@@ -576,6 +576,9 @@ func EqualExportedValues(t TestingT, expected, actual interface{}, msgAndArgs ..
 
 	//expected = removeUnexported(expected)
 	//actual = removeUnexported(actual)
+
+	expected := removeUnexported(expectedRaw)
+	actual := removeUnexported(actualRaw)
 
 	if !ObjectsExportedFieldsAreEqual(expected, actual) {
 		diff := diff(expected, actual)
