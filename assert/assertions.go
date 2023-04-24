@@ -330,7 +330,7 @@ type labeledContent struct {
 
 // labeledOutput returns a string consisting of the provided labeledContent. Each labeled output is appended in the following manner:
 //
-//	\t{{label}}:{{align_spaces}}\t{{content}}\n
+//   \t{{label}}:{{align_spaces}}\t{{content}}\n
 //
 // The initial carriage return is required to undo/erase any padding added by testing.T.Errorf. The "\t{{label}}:" is for the label.
 // If a label is shorter than the longest label provided, padding spaces are added to make all the labels match in length. Once this
@@ -353,7 +353,7 @@ func labeledOutput(content ...labeledContent) string {
 
 // Implements asserts that an object is implemented by the specified interface.
 //
-//	assert.Implements(t, (*MyInterface)(nil), new(MyObject))
+//    assert.Implements(t, (*MyInterface)(nil), new(MyObject))
 func Implements(t TestingT, interfaceObject interface{}, object interface{}, msgAndArgs ...interface{}) bool {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
