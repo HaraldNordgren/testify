@@ -75,6 +75,8 @@ func ObjectsAreEqual(expected, actual interface{}) bool {
 	return bytes.Equal(exp, act)
 }
 
+// copyExportedFields iterates downward through nested data structures and creates a copy
+// that only contains the exported struct fields.
 func copyExportedFields(expected interface{}) interface{} {
 	if isNil(expected) {
 		return expected
