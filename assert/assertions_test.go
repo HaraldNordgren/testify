@@ -324,20 +324,20 @@ func TestCopyExportedFields(t *testing.T) {
 
 func TestEqualExportedValues(t *testing.T) {
 	cases := []struct {
-		value1          interface{}
-		value2          interface{}
-		expectedSuccess bool
-		expectedFail    string
+		value1        interface{}
+		value2        interface{}
+		expectedEqual bool
+		expectedFail  string
 	}{
 		{
-			value1:          S{1, Nested{2, 3}, 4, Nested{5, 6}},
-			value2:          S{1, Nested{2, nil}, nil, Nested{}},
-			expectedSuccess: true,
+			value1:        S{1, Nested{2, 3}, 4, Nested{5, 6}},
+			value2:        S{1, Nested{2, nil}, nil, Nested{}},
+			expectedEqual: true,
 		},
 		{
-			value1:          S{1, Nested{2, 3}, 4, Nested{5, 6}},
-			value2:          S{1, Nested{1, nil}, nil, Nested{}},
-			expectedSuccess: false,
+			value1:        S{1, Nested{2, 3}, 4, Nested{5, 6}},
+			value2:        S{1, Nested{1, nil}, nil, Nested{}},
+			expectedEqual: false,
 			expectedFail: `
 	Error Trace:	
 	Error:      	Not equal (comparing only exported fields): 
@@ -360,8 +360,8 @@ func TestEqualExportedValues(t *testing.T) {
 			mockT := new(mockTestingT)
 
 			actual := EqualExportedValues(mockT, c.value1, c.value2)
-			if actual != c.expectedSuccess {
-				t.Errorf("Expected EqualExportedValues to be %t, but was %t", c.expectedSuccess, actual)
+			if actual != c.expectedEqual {
+				t.Errorf("Expected EqualExportedValues to be %t, but was %t", c.expectedEqual, actual)
 			}
 
 			actualFail := mockT.errorString()
