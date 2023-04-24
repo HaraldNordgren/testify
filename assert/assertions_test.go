@@ -355,6 +355,26 @@ func TestEqualExportedValues(t *testing.T) {
 	            	+  Exported: (string) (len=1) "a",
 	            	   notExported: (interface {}) <nil>`,
 		},
+		{
+			value1: S4{[]*Nested{
+				{1, 2},
+				{3, 4},
+			}},
+			value2: S4{[]*Nested{
+				{1, "a"},
+				{2, "b"},
+			}},
+			expectedEqual: false,
+			expectedFail: `
+	            	Diff:
+	            	--- Expected
+	            	+++ Actual
+	            	@@ -7,3 +7,3 @@
+	            	   (*assert.Nested)({
+	            	-   Exported: (int) 3,
+	            	+   Exported: (int) 2,
+	            	    notExported: (interface {}) <nil>`,
+		},
 	}
 
 	for _, c := range cases {
