@@ -178,7 +178,7 @@ type S5 struct {
 	Exported Nested
 }
 
-type Foo struct {
+type S6 struct {
 	Exported   string
 	unexported string
 }
@@ -229,8 +229,12 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 
 		})
 	}
+}
 
-	cases1 := []struct {
+func TestCopyExportedFields(t *testing.T) {
+	intValue := 1
+
+	cases := []struct {
 		input    interface{}
 		expected interface{}
 	}{
@@ -251,8 +255,8 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 			expected: Nested{&intValue, nil},
 		},
 		{
-			input:    Foo{"a", "b"},
-			expected: Foo{"a", ""},
+			input:    S6{"a", "b"},
+			expected: S6{"a", ""},
 		},
 		{
 			input:    Nested{"a", "b"},
@@ -308,7 +312,7 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases1 {
+	for _, c := range cases {
 		t.Run("", func(t *testing.T) {
 			output := copyExportedFields(c.input)
 			if !ObjectsAreEqualValues(c.expected, output) {
