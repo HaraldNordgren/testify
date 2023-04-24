@@ -385,7 +385,7 @@ func IsType(t TestingT, expectedType interface{}, object interface{}, msgAndArgs
 
 // Equal asserts that two objects are equal.
 //
-//	assert.Equal(t, 123, 123)
+//    assert.Equal(t, 123, 123)
 //
 // Pointer variable equality is determined based on the equality of the
 // referenced values (as opposed to the memory addresses). Function equality
@@ -426,7 +426,7 @@ func validateEqualArgs(expected, actual interface{}) error {
 
 // Same asserts that two pointers reference the same object.
 //
-//	assert.Same(t, ptr1, ptr2)
+//    assert.Same(t, ptr1, ptr2)
 //
 // Both arguments must be pointer variables. Pointer variable sameness is
 // determined based on the equality of both type and value.
@@ -446,7 +446,7 @@ func Same(t TestingT, expected, actual interface{}, msgAndArgs ...interface{}) b
 
 // NotSame asserts that two pointers do not reference the same object.
 //
-//	assert.NotSame(t, ptr1, ptr2)
+//    assert.NotSame(t, ptr1, ptr2)
 //
 // Both arguments must be pointer variables. Pointer variable sameness is
 // determined based on the equality of both type and value.
@@ -514,7 +514,7 @@ func truncatingFormat(data interface{}) string {
 // EqualValues asserts that two objects are equal or convertable to the same types
 // and equal.
 //
-//	assert.EqualValues(t, uint32(123), int32(123))
+//    assert.EqualValues(t, uint32(123), int32(123))
 func EqualValues(t TestingT, expected, actual interface{}, msgAndArgs ...interface{}) bool {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
