@@ -359,9 +359,9 @@ func TestEqualExportedValues(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			mockT := new(mockTestingT)
 
-			result := EqualExportedValues(mockT, c.value1, c.value2)
-			if result != c.expectedSuccess {
-				t.Errorf("wrong result")
+			actual := EqualExportedValues(mockT, c.value1, c.value2)
+			if actual != c.expectedSuccess {
+				t.Errorf("Expected EqualExportedValues to be %t, but was %t", c.expectedSuccess, actual)
 			}
 
 			actualFail := mockT.errorString()
