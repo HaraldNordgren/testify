@@ -84,9 +84,6 @@ func copyExportedFields(expected interface{}) interface{} {
 	expectedKind := expectedType.Kind()
 	expectedValue := reflect.ValueOf(expected)
 
-	fmt.Printf("\n#####1 %s\n", expectedKind)
-	fmt.Printf("!!!!!11 %#v\n", expectedValue)
-
 	switch expectedKind {
 	case reflect.Struct:
 		result := reflect.New(expectedType).Elem()
@@ -98,23 +95,16 @@ func copyExportedFields(expected interface{}) interface{} {
 				if isNil(fieldValue) || isNil(fieldValue.Interface()) {
 					continue
 				}
-				fmt.Printf("!!!!!21 %#v\n", fieldValue)
 				newValue := copyExportedFields(fieldValue.Interface())
-				fmt.Printf("!!!!!22 %#v\n", newValue)
 				result.Field(i).Set(reflect.ValueOf(newValue))
 			}
 		}
-
-		fmt.Printf("!!!!!22 struct to return %#v\n", result.Interface())
 		return result.Interface()
 
 	case reflect.Ptr:
 		result := reflect.New(expectedType.Elem())
-		fmt.Printf("!!!!!!3 %#v\n", result)
 		unexportedRemoved := copyExportedFields(expectedValue.Elem().Interface())
-		fmt.Printf("!!!!!!31 %#v\n", unexportedRemoved)
 		result.Elem().Set(reflect.ValueOf(unexportedRemoved))
-		fmt.Printf("!!!!!!32 %#v\n", expected)
 		return result.Interface()
 
 	case reflect.Array, reflect.Slice:
@@ -124,8 +114,6 @@ func copyExportedFields(expected interface{}) interface{} {
 			if isNil(index) {
 				continue
 			}
-			fmt.Printf("!!!!!!41 %#v\n", index)
-			fmt.Printf("!!!!!!42 %#v\n", result)
 			unexportedRemoved := copyExportedFields(index.Interface())
 			result.Index(i).Set(reflect.ValueOf(unexportedRemoved))
 		}

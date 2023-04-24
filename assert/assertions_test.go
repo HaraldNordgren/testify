@@ -387,7 +387,6 @@ func TestEqualExportedValues(t *testing.T) {
 			}
 
 			actualFail := mockT.errorString()
-			fmt.Printf("!!!!!11 %v\n", actualFail)
 			if !strings.Contains(actualFail, c.expectedFail) {
 				t.Errorf("Contains failure should include %q but was %q", c.expectedFail, actualFail)
 			}
