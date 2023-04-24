@@ -213,6 +213,7 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 		{S4{[]*Nested{{1, 2}}}, S4{[]*Nested{{1, 2}}}, true},
 		{S4{[]*Nested{{1, 2}}}, S4{[]*Nested{{1, 3}}}, true},
 		{S4{[]*Nested{{1, 2}, {3, 4}}}, S4{[]*Nested{{1, "a"}, {3, "b"}}}, true},
+		{S4{[]*Nested{{1, 2}, {3, 4}}}, S4{[]*Nested{{1, "a"}, {2, "b"}}}, false},
 
 		{Nested{&intValue, 2}, Nested{&intValue, 2}, true},
 		{Nested{&Nested{1, 2}, 3}, Nested{&Nested{1, "b"}, 3}, true},
