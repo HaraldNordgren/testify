@@ -331,11 +331,6 @@ func TestEqualExportedValues(t *testing.T) {
 			value2:        S{1, Nested{1, nil}, nil, Nested{}},
 			expectedEqual: false,
 			expectedFail: `
-	Error Trace:	
-	Error:      	Not equal (comparing only exported fields): 
-	            	expected: assert.S{Exported1:1, Exported2:assert.Nested{Exported:2, notExported:interface {}(nil)}, notExported1:interface {}(nil), notExported2:assert.Nested{Exported:interface {}(nil), notExported:interface {}(nil)}}
-	            	actual  : assert.S{Exported1:1, Exported2:assert.Nested{Exported:1, notExported:interface {}(nil)}, notExported1:interface {}(nil), notExported2:assert.Nested{Exported:interface {}(nil), notExported:interface {}(nil)}}
-	            	
 	            	Diff:
 	            	--- Expected
 	            	+++ Actual
@@ -343,6 +338,20 @@ func TestEqualExportedValues(t *testing.T) {
 	            	  Exported2: (assert.Nested) {
 	            	-  Exported: (int) 2,
 	            	+  Exported: (int) 1,
+	            	   notExported: (interface {}) <nil>`,
+		},
+		{
+			value1:        S3{&Nested{1, 2}, &Nested{3, 4}},
+			value2:        S3{&Nested{"a", 2}, &Nested{3, 4}},
+			expectedEqual: false,
+			expectedFail: `
+	            	Diff:
+	            	--- Expected
+	            	+++ Actual
+	            	@@ -2,3 +2,3 @@
+	            	  Exported1: (*assert.Nested)({
+	            	-  Exported: (int) 1,
+	            	+  Exported: (string) (len=1) "a",
 	            	   notExported: (interface {}) <nil>`,
 		},
 	}
@@ -357,6 +366,7 @@ func TestEqualExportedValues(t *testing.T) {
 			}
 
 			actualFail := mockT.errorString()
+			fmt.Printf("!!!!!11 %v\n", actualFail)
 			if !strings.Contains(actualFail, c.expectedFail) {
 				t.Errorf("Contains failure should include %q but was %q", c.expectedFail, actualFail)
 			}
