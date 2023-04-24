@@ -2346,27 +2346,6 @@ Diff:
 	Equal(t, expected, actual)
 }
 
-// TODO: Remove
-func TestDiffExported(t *testing.T) {
-	expected := `
-
-Diff:
---- Expected
-+++ Actual
-@@ -2,3 +2,3 @@
-  A: (string) (len=11) "some string",
-- B: (int) 10
-+ B: (int) 15
- }
-`
-
-	actual := diff(
-		diffTestingStruct{A: "some string", B: 10},
-		diffTestingStruct{A: "some string", B: 15},
-	)
-	Equal(t, expected, actual)
-}
-
 func TestTimeEqualityErrorFormatting(t *testing.T) {
 	mockT := new(mockTestingT)
 
