@@ -554,13 +554,13 @@ func EqualValues(t TestingT, expected, actual interface{}, msgAndArgs ...interfa
 //	 }
 //	 assert.EqualExportedValues(t, S{1, 2}, S{1, 3}) => true
 //	 assert.EqualExportedValues(t, S{1, 2}, S{2, 3}) => false
-func EqualExportedValues(t TestingT, expectedRaw, actualRaw interface{}, msgAndArgs ...interface{}) bool {
+func EqualExportedValues(t TestingT, expected, actual interface{}, msgAndArgs ...interface{}) bool {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
 	}
 
-	aType := reflect.TypeOf(expectedRaw)
-	bType := reflect.TypeOf(actualRaw)
+	aType := reflect.TypeOf(expected)
+	bType := reflect.TypeOf(actual)
 
 	if aType != bType {
 		return Fail(t, fmt.Sprintf("Types expected to match exactly\n\t%v != %v", aType, bType), msgAndArgs...)
@@ -574,8 +574,8 @@ func EqualExportedValues(t TestingT, expectedRaw, actualRaw interface{}, msgAndA
 		return Fail(t, fmt.Sprintf("Types expected to both be struct \n\t%v != %v", bType.Kind(), reflect.Struct), msgAndArgs...)
 	}
 
-	expected := copyExportedFields(expectedRaw)
-	actual := copyExportedFields(actualRaw)
+	expected = copyExportedFields(expected)
+	actual = copyExportedFields(actual)
 
 	if !ObjectsExportedFieldsAreEqual(expected, actual) {
 		diff := diff(expected, actual)
