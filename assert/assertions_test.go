@@ -310,11 +310,10 @@ func TestObjectsExportedFieldsAreEqual(t *testing.T) {
 
 	for _, c := range cases1 {
 		t.Run("", func(t *testing.T) {
-			output := removeUnexported(c.input)
+			output := copyExportedFields(c.input)
 			if !ObjectsAreEqualValues(c.expected, output) {
 				t.Errorf("%#v, %#v should be equal", c.expected, output)
 			}
-
 		})
 	}
 }

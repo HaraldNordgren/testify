@@ -75,7 +75,7 @@ func ObjectsAreEqual(expected, actual interface{}) bool {
 	return bytes.Equal(exp, act)
 }
 
-func removeUnexported(expected interface{}) interface{} {
+func copyExportedFields(expected interface{}) interface{} {
 	if isNil(expected) {
 		return expected
 	}
@@ -99,7 +99,7 @@ func removeUnexported(expected interface{}) interface{} {
 					continue
 				}
 				fmt.Printf("!!!!!21 %#v\n", fieldValue)
-				newValue := removeUnexported(fieldValue.Interface())
+				newValue := copyExportedFields(fieldValue.Interface())
 				fmt.Printf("!!!!!22 %#v\n", newValue)
 				result.Field(i).Set(reflect.ValueOf(newValue))
 			}
@@ -111,7 +111,7 @@ func removeUnexported(expected interface{}) interface{} {
 	case reflect.Ptr:
 		result := reflect.New(expectedType.Elem())
 		fmt.Printf("!!!!!!3 %#v\n", result)
-		unexportedRemoved := removeUnexported(expectedValue.Elem().Interface())
+		unexportedRemoved := copyExportedFields(expectedValue.Elem().Interface())
 		fmt.Printf("!!!!!!31 %#v\n", unexportedRemoved)
 		result.Elem().Set(reflect.ValueOf(unexportedRemoved))
 		fmt.Printf("!!!!!!32 %#v\n", expected)
@@ -126,7 +126,7 @@ func removeUnexported(expected interface{}) interface{} {
 			}
 			fmt.Printf("!!!!!!41 %#v\n", index)
 			fmt.Printf("!!!!!!42 %#v\n", result)
-			unexportedRemoved := removeUnexported(index.Interface())
+			unexportedRemoved := copyExportedFields(index.Interface())
 			result.Index(i).Set(reflect.ValueOf(unexportedRemoved))
 		}
 		return result.Interface()
@@ -141,9 +141,9 @@ func removeUnexported(expected interface{}) interface{} {
 //
 // This function does no assertion of any kind.
 func ObjectsExportedFieldsAreEqual(expected, actual interface{}) bool {
-	//expectedCleaned := removeUnexported(expected)
-	//actualCleaned := removeUnexported(actual)
-	return ObjectsAreEqualValues(expected, actual)
+	expectedCleaned := copyExportedFields(expected)
+	actualCleaned := copyExportedFields(actual)
+	return ObjectsAreEqualValues(expectedCleaned, actualCleaned)
 }
 
 // ObjectsAreEqualValues gets whether two objects are equal, or if their
@@ -577,8 +577,8 @@ func EqualExportedValues(t TestingT, expectedRaw, actualRaw interface{}, msgAndA
 	//expected = removeUnexported(expected)
 	//actual = removeUnexported(actual)
 
-	expected := removeUnexported(expectedRaw)
-	actual := removeUnexported(actualRaw)
+	expected := copyExportedFields(expectedRaw)
+	actual := copyExportedFields(actualRaw)
 
 	if !ObjectsExportedFieldsAreEqual(expected, actual) {
 		diff := diff(expected, actual)
