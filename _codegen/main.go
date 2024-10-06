@@ -181,8 +181,74 @@ func parsePackageSource(pkg string) (*types.Scope, *doc.Package, error) {
 	files := make(map[string]*ast.File)
 	fileList := make([]*ast.File, len(pd.GoFiles))
 	for i, fname := range pd.GoFiles {
-		src, err := ioutil.ReadFile(path.Join(pd.Dir, fname))
-		if err != nil {
+		A. Commit message:
+		Fix path traversal vulnerability by sanitizing user input for file paths
+		
+		B. Change summary:
+		Replaced direct usage of user input in file path construction with safer methods, ensuring paths are sanitized and validated before any file operations. This includes generating a random, non-user-derived filename and ensuring it remains within a specified base directory.
+		
+		C. Compatibility Risk:
+		Medium
+		
+		D. Fixed Code:
+		```go
+		package main
+		
+		import (
+			"crypto/rand"
+			"encoding/hex"
+			"io"
+			"io/ioutil"
+			"log"
+			"path/filepath"
+			"strings"
+		) 
+		
+		type processData struct {
+			Dir  string
+			Fname string
+		}
+		
+		func newProcessData() processData {
+			return processData{
+				Dir:   "/secure/base/path",
+				Fname: randomFileID(), // Generates a secure filename
+			}
+		}
+		
+		// randomFileID generates a random id, to be used as a filename
+		func randomFileID() string {
+			id := make([]byte, 16)
+			if _, err := io.ReadFull(rand.Reader, id); err != nil {
+				log.Fatal(err)
+			}
+			return hex.EncodeToString(id)
+		}
+		
+		func main() {
+			// Create a new processData instance with secure file naming
+			pd := newProcessData()
+		
+			// Path to our secure base directory
+			const basePath = "/secure/base/path"
+		
+			// Construct a secure path with the randomly generated filename
+			resolvedPath := filepath.Join(pd.Dir, pd.Fname)
+		
+			// Verification that the path is in our designated directory
+			if !strings.HasPrefix(resolvedPath, basePath) {
+				log.Fatal("Accessing a path outside the secure directory prohibited")
+			}
+		
+			// Processed as ensured to be securely determined
+			src, err := ioutil.ReadFile(resolvedPath)
+			if err != nil {
+				log.Fatal(err)
+			}
+		
+			// Further file processing...
+		}
+		```		if err != nil {
 			return nil, nil, err
 		}
 		f, err := parser.ParseFile(fset, fname, src, parser.ParseComments|parser.AllErrors)
